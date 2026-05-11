@@ -65,12 +65,12 @@
 
     <nav>
         <div class="container nav-flex">
-            <a onclick="showPage('home')" class="logo">LUXE.</a>
+            <a onclick="navigateTo('home')" class="logo">LUXE.</a>
             <div class="nav-right">
-                <span class="nav-link" onclick="showPage('home')">Shop</span>
-                <span class="nav-link" onclick="showPage('contact')">Contact</span>
-                <span class="nav-link" onclick="showPage('login')">Login</span>
-                <span class="nav-link" onclick="showPage('cart')" style="font-weight:bold;">🛒 (<span id="cart-count">0</span>)</span>
+                <span class="nav-link" onclick="navigateTo('home')">Shop</span>
+                <span class="nav-link" onclick="navigateTo('contact')">Contact</span>
+                <span class="nav-link" onclick="navigateTo('login')">Login</span>
+                <span class="nav-link" onclick="navigateTo('cart')" style="font-weight:bold;">🛒 (<span id="cart-count">0</span>)</span>
             </div>
         </div>
     </nav>
@@ -105,7 +105,7 @@
     <main id="contact" class="page-section">
         <div style="max-width:600px; margin: 60px auto; padding:40px; border:1px solid #eee; border-radius:15px;">
             <h2 style="text-align:center; font-family:'Playfair Display';">Contact Us</h2>
-            <form onsubmit="event.preventDefault(); alert('Message Sent!'); showPage('home');">
+            <form onsubmit="event.preventDefault(); alert('Message Sent!'); navigateTo('home');">
                 <input type="text" placeholder="Full Name" required>
                 <input type="email" placeholder="Email" required>
                 <textarea placeholder="How can we help?" rows="5" required></textarea>
@@ -117,7 +117,7 @@
     <main id="login" class="page-section">
         <div style="max-width:400px; margin: 80px auto; padding:40px; border:1px solid #eee; border-radius:15px; text-align:center;">
             <h2 style="margin-bottom:20px;">Welcome Back</h2>
-            <form onsubmit="event.preventDefault(); alert('Logged In!'); showPage('home');">
+            <form onsubmit="event.preventDefault(); alert('Logged In!'); navigateTo('home');">
                 <input type="email" placeholder="Email" required>
                 <input type="password" placeholder="Password" required>
                 <button type="submit" class="btn" style="width:100%; margin-top:10px;">Sign In</button>
@@ -131,7 +131,7 @@
             <div id="cart-items-list" style="margin-top: 20px;"></div>
             <div id="cart-footer" style="display:none; text-align: right; margin-top: 30px;">
                 <h2 id="cart-total" style="margin-bottom: 20px;">Total: $0</h2>
-                <button class="btn" style="width: auto; padding: 15px 60px;" onclick="showPage('checkout')">Proceed to Checkout</button>
+                <button class="btn" style="width: auto; padding: 15px 60px;" onclick="navigateTo('checkout')">Proceed to Checkout</button>
             </div>
         </div>
     </main>
@@ -194,7 +194,37 @@
 
         let cart = [];
 
-        // Render Home Grid
+        // --- DYNAMIC NAVIGATION LOGIC (BACK BUTTON FIX) ---
+        function navigateTo(pageId, pushState = true) {
+            // Hide all sections and show the target one
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            const targetSection = document.getElementById(pageId);
+            if(targetSection) targetSection.classList.add('active');
+            
+            window.scrollTo(0,0);
+            renderCart();
+
+            // Push the new state to browser history
+            if (pushState) {
+                history.pushState({ pageId: pageId }, null, "");
+            }
+        }
+
+        // Event listener for browser Back and Forward buttons
+        window.onpopstate = function(event) {
+            if (event.state && event.state.pageId) {
+                navigateTo(event.state.pageId, false);
+            } else {
+                navigateTo('home', false);
+            }
+        };
+
+        // Ensure the initial page load is tracked in history
+        window.onload = function() {
+            history.replaceState({ pageId: 'home' }, null, "");
+        };
+
+        // --- PRODUCT GRID LOGIC ---
         const grid = document.getElementById('product-display');
         products.forEach(p => {
             grid.innerHTML += `
@@ -209,13 +239,7 @@
             `;
         });
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            window.scrollTo(0,0);
-            renderCart();
-        }
-
+        // --- CART LOGIC ---
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             cart.push({...product, cartId: Date.now() + Math.random()});
@@ -238,23 +262,19 @@
             const checkoutList = document.getElementById('checkout-summary-list');
             const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-            if (cart.length === 0) {
-                list.innerHTML = '<p style="text-align:center; padding:50px; color:#999;">Your cart is empty.</p>';
-                document.getElementById('cart-footer').style.display = 'none';
-                checkoutList.innerHTML = '<p>No items in cart.</p>';
-            } else {
-                document.getElementById('cart-footer').style.display = 'block';
-                const itemsHTML = cart.map(item => `
+            const itemsHTML = cart.length === 0 
+                ? '<p style="text-align:center; padding:50px; color:#999;">Your cart is empty.</p>'
+                : cart.map(item => `
                     <div class="summary-item">
                         <span>${item.name}</span>
                         <span>$${item.price} <button class="btn-remove" onclick="removeFromCart(${item.cartId})">Remove</button></span>
                     </div>
                 `).join('');
-                
-                list.innerHTML = itemsHTML;
-                checkoutList.innerHTML = itemsHTML;
-            }
 
+            list.innerHTML = itemsHTML;
+            checkoutList.innerHTML = cart.length === 0 ? '<p>No items in cart.</p>' : itemsHTML;
+            
+            document.getElementById('cart-footer').style.display = cart.length === 0 ? 'none' : 'block';
             document.getElementById('cart-total').innerText = 'Total: $' + total;
             document.getElementById('final-total').innerText = '$' + total;
         }
@@ -266,15 +286,15 @@
             alert("Success! Order confirmed for " + email);
             cart = [];
             updateNavCount();
-            showPage('home');
+            navigateTo('home');
         }
 
-        // Timer Logic
+        // --- TIMER LOGIC ---
         setInterval(() => {
             const s = document.getElementById('t-s');
+            if(!s) return;
             let val = parseInt(s.innerText);
-            if(val > 0) s.innerText = (val - 1).toString().padStart(2, '0');
-            else s.innerText = "59";
+            s.innerText = val > 0 ? (val - 1).toString().padStart(2, '0') : "59";
         }, 1000);
     </script>
 </body>
