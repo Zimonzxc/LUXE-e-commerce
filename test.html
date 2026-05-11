@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxe Premium | Full Feature Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0A0F1E;
+            --accent: #F5A623;
+            --light: #F4F5F7;
+            --text: #1A1A1A;
+            --sale-red: #E02020;
+            --success: #27ae60;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DM Sans', sans-serif; }
+        body { background: white; color: var(--text); overflow-x: hidden; scroll-behavior: smooth; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        /* Navigation */
+        nav { background: var(--primary); padding: 20px 0; color: white; position: sticky; top: 0; z-index: 1000; }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 26px; color: white; text-decoration: none; cursor: pointer; font-weight: 900; }
+        .nav-right { display: flex; gap: 20px; align-items: center; }
+        .nav-link { cursor: pointer; transition: 0.3s; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-link:hover { color: var(--accent); }
+
+        /* Page Handling */
+        .page-section { display: none; min-height: 80vh; padding-bottom: 80px; }
+        .page-section.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Hero & Product Grid */
+        .hero { background: linear-gradient(rgba(10,15,30,0.7), rgba(10,15,30,0.7)), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; padding: 100px 0; color: white; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 40px 0; }
+        .card { border: 1px solid #eee; border-radius: 12px; overflow: hidden; transition: 0.3s; text-align: center; padding-bottom: 20px; background: #fff; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .card img { width: 100%; height: 250px; object-fit: cover; }
+        
+        /* CTA Banner & Timer */
+        .cta-banner { background: var(--sale-red); color: white; padding: 40px 0; text-align: center; margin: 40px 0; }
+        .timer { display: flex; justify-content: center; gap: 15px; margin: 20px 0; font-size: 24px; font-weight: bold; }
+        .timer-box { background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 5px; }
+
+        /* Forms & Buttons */
+        .form-section-title { margin: 25px 0 10px; font-size: 18px; border-bottom: 1px solid #ddd; padding-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        .btn { background: var(--accent); color: var(--primary); padding: 16px 30px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; border: none; cursor: pointer; transition: 0.3s; text-align: center; }
+        .btn-remove { background: none; color: var(--sale-red); border: none; cursor: pointer; font-size: 12px; text-decoration: underline; margin-left: 10px; }
+
+        /* Checkout Layout */
+        .checkout-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 40px; margin-top: 40px; }
+        .order-summary-box { background: var(--light); padding: 25px; border-radius: 12px; position: sticky; top: 100px; height: fit-content; }
+        .summary-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #ddd; }
+
+        footer { background: var(--primary); color: #666; padding: 60px 0; text-align: center; }
+        @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="announcement" style="background:var(--accent); text-align:center; padding:8px; font-weight:bold; font-size:13px;">⚡ LIMITED TIME: FREE SHIPPING ON ALL ORDERS</div>
+
+    <nav>
+        <div class="container nav-flex">
+            <a onclick="showPage('home')" class="logo">LUXE.</a>
+            <div class="nav-right">
+                <span class="nav-link" onclick="showPage('home')">Shop</span>
+                <span class="nav-link" onclick="showPage('contact')">Contact</span>
+                <span class="nav-link" onclick="showPage('login')">Login</span>
+                <span class="nav-link" onclick="showPage('cart')" style="font-weight:bold;">🛒 (<span id="cart-count">0</span>)</span>
+            </div>
+        </div>
+    </nav>
+
+    <main id="home" class="page-section active">
+        <section class="hero">
+            <div class="container">
+                <h1 style="font-size: 48px; font-family: 'Playfair Display';">Elevate Your Lifestyle</h1>
+                <p style="margin: 20px 0;">Premium quality goods delivered to your door.</p>
+                <button class="btn" style="width:auto;" onclick="document.getElementById('main-grid').scrollIntoView()">Explore Collection</button>
+            </div>
+        </section>
+
+        <div class="container" id="main-grid">
+            <div class="grid" id="product-display">
+                </div>
+        </div>
+
+        <section class="cta-banner">
+            <div class="container">
+                <h2>⚡ FLASH SALE: 40% OFF SITEWIDE</h2>
+                <div class="timer">
+                    <div class="timer-box"><span id="t-h">23</span>h</div>
+                    <div class="timer-box"><span id="t-m">59</span>m</div>
+                    <div class="timer-box"><span id="t-s">59</span>s</div>
+                </div>
+                <p>Limited Stock Available. Grab yours before time runs out!</p>
+            </div>
+        </section>
+    </main>
+
+    <main id="contact" class="page-section">
+        <div style="max-width:600px; margin: 60px auto; padding:40px; border:1px solid #eee; border-radius:15px;">
+            <h2 style="text-align:center; font-family:'Playfair Display';">Contact Us</h2>
+            <form onsubmit="event.preventDefault(); alert('Message Sent!'); showPage('home');">
+                <input type="text" placeholder="Full Name" required>
+                <input type="email" placeholder="Email" required>
+                <textarea placeholder="How can we help?" rows="5" required></textarea>
+                <button type="submit" class="btn" style="width:100%;">Send Message</button>
+            </form>
+        </div>
+    </main>
+
+    <main id="login" class="page-section">
+        <div style="max-width:400px; margin: 80px auto; padding:40px; border:1px solid #eee; border-radius:15px; text-align:center;">
+            <h2 style="margin-bottom:20px;">Welcome Back</h2>
+            <form onsubmit="event.preventDefault(); alert('Logged In!'); showPage('home');">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit" class="btn" style="width:100%; margin-top:10px;">Sign In</button>
+            </form>
+        </div>
+    </main>
+
+    <main id="cart" class="page-section">
+        <div class="container" style="max-width: 800px; margin-top: 50px;">
+            <h2 style="font-family: 'Playfair Display'; font-size: 32px;">Your Shopping Bag</h2>
+            <div id="cart-items-list" style="margin-top: 20px;"></div>
+            <div id="cart-footer" style="display:none; text-align: right; margin-top: 30px;">
+                <h2 id="cart-total" style="margin-bottom: 20px;">Total: $0</h2>
+                <button class="btn" style="width: auto; padding: 15px 60px;" onclick="showPage('checkout')">Proceed to Checkout</button>
+            </div>
+        </div>
+    </main>
+
+    <main id="checkout" class="page-section">
+        <div class="container">
+            <div class="checkout-grid">
+                <div class="form-container">
+                    <h2 style="font-family: 'Playfair Display';">Checkout</h2>
+                    
+                    <h3 class="form-section-title">1. Contact & Shipping</h3>
+                    <input type="email" id="checkout-email" placeholder="Email Address" required>
+                    <input type="tel" placeholder="Phone Number">
+                    <input type="text" placeholder="Full Name">
+                    <input type="text" placeholder="Street Address">
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" placeholder="City">
+                        <input type="text" placeholder="ZIP Code">
+                    </div>
+
+                    <h3 class="form-section-title">2. Payment Method</h3>
+                    <div style="font-size: 24px; margin-bottom: 10px;">💳 🅿️  🛍️</div>
+                    <select>
+                        <option>Credit Card</option>
+                        <option>PayPal</option>
+                        <option>Apple Pay</option>
+                    </select>
+                    <input type="text" placeholder="Card Number">
+                    <button class="btn" style="background: var(--success); color:white; margin-top:20px; width:100%;" onclick="processOrder()">Complete Purchase</button>
+                </div>
+
+                <div class="order-summary-box">
+                    <h3>Order Summary</h3>
+                    <div id="checkout-summary-list" style="margin: 20px 0;"></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:22px; border-top:2px solid #ddd; padding-top:15px;">
+                        <span>Total</span>
+                        <span id="final-total">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <h2 style="color:white; margin-bottom:15px;">LUXE.</h2>
+            <p>© 2025 Premium Store. SSL Secure Checkout.</p>
+        </div>
+    </footer>
+
+    <script>
+        const products = [
+            { id: 1, name: "Chronos Gold Watch", price: 199 },
+            { id: 2, name: "Sonic Pro Audio", price: 89 },
+            { id: 3, name: "Aura Smart Lamp", price: 45 },
+            { id: 4, name: "Nomad Backpack", price: 120 },
+            { id: 5, name: "Leather Wallet", price: 55 },
+            { id: 6, name: "Minimalist Flask", price: 35 }
+        ];
+
+        let cart = [];
+
+        // Render Home Grid
+        const grid = document.getElementById('product-display');
+        products.forEach(p => {
+            grid.innerHTML += `
+                <div class="card">
+                    <img src="https://placehold.co/400x400/0A0F1E/FFFFFF?text=${p.name}">
+                    <div style="padding:15px;">
+                        <h3>${p.name}</h3>
+                        <p style="color:var(--sale-red); font-weight:bold; margin:10px 0;">$${p.price}.00</p>
+                        <button class="btn" style="width:100%" onclick="addToCart(${p.id})">Add to Cart</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0,0);
+            renderCart();
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push({...product, cartId: Date.now() + Math.random()});
+            updateNavCount();
+            alert("Added " + product.name + " to bag!");
+        }
+
+        function removeFromCart(cartId) {
+            cart = cart.filter(item => item.cartId !== cartId);
+            updateNavCount();
+            renderCart();
+        }
+
+        function updateNavCount() {
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cart-items-list');
+            const checkoutList = document.getElementById('checkout-summary-list');
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+            if (cart.length === 0) {
+                list.innerHTML = '<p style="text-align:center; padding:50px; color:#999;">Your cart is empty.</p>';
+                document.getElementById('cart-footer').style.display = 'none';
+                checkoutList.innerHTML = '<p>No items in cart.</p>';
+            } else {
+                document.getElementById('cart-footer').style.display = 'block';
+                const itemsHTML = cart.map(item => `
+                    <div class="summary-item">
+                        <span>${item.name}</span>
+                        <span>$${item.price} <button class="btn-remove" onclick="removeFromCart(${item.cartId})">Remove</button></span>
+                    </div>
+                `).join('');
+                
+                list.innerHTML = itemsHTML;
+                checkoutList.innerHTML = itemsHTML;
+            }
+
+            document.getElementById('cart-total').innerText = 'Total: $' + total;
+            document.getElementById('final-total').innerText = '$' + total;
+        }
+
+        function processOrder() {
+            if(cart.length === 0) return alert("Add items to your cart first!");
+            const email = document.getElementById('checkout-email').value;
+            if(!email) return alert("Email is required!");
+            alert("Success! Order confirmed for " + email);
+            cart = [];
+            updateNavCount();
+            showPage('home');
+        }
+
+        // Timer Logic
+        setInterval(() => {
+            const s = document.getElementById('t-s');
+            let val = parseInt(s.innerText);
+            if(val > 0) s.innerText = (val - 1).toString().padStart(2, '0');
+            else s.innerText = "59";
+        }, 1000);
+    </script>
+</body>
+</html>
